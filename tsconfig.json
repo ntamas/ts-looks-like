@@ -1,0 +1,41 @@
+{
+    "compileOnSave": true,
+
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "baseUrl": "src",
+        "declaration": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "jsx": "react",
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "newLine": "LF",
+        "outDir": "lib/",
+        "rootDir": "./",
+        "rootDirs": [
+            "src",
+            "test"
+        ],
+        "sourceMap": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "target": "es6",
+        "types": ["chai", "chai-as-promised", "chai-spies", "mocha", "node"]
+    },
+
+    "include": [
+        "src/**/*",
+        "test/**/*"
+    ],
+
+    "exclude": [
+        "lib",
+        "node_modules"
+    ],
+
+    "atom": {
+        "formatOnSave": false
+    }
+}

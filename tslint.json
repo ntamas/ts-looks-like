@@ -1,0 +1,15 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "arrow-parens": false,
+        "comment-format": false,
+        "max-classes-per-file": 3,
+        "member-ordering": false,
+        "no-console": false,
+        "no-namespace": [true, "allow-declarations"],
+        "no-unused-expression": false,
+        "no-var-requires": false,
+        "trailing-comma": false,
+        "variable-name": [true, "allow-pascal-case", "ban-keywords", "check-format", "allow-leading-underscore"]
+    }
+}
