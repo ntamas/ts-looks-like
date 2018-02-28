@@ -1,4 +1,4 @@
-import looksLike, { instanceOf, optional } from "../src";
+import looksLike, { instanceOf, maybeNil, maybeNull, optional } from "../src";
 
 const { expect } = chai;
 
@@ -240,6 +240,27 @@ describe("looksLike", () => {
         expect(guard(instance)).to.be.true;
     });
 
+    it("should allow maybeNull() modifier for numbers", () => {
+        const guard = looksLike(maybeNull(42));
+
+        expect(guard(123)).to.be.true;
+        expect(guard(NaN)).to.be.true;
+        expect(guard(Number.POSITIVE_INFINITY)).to.be.true;
+        expect(guard(Number.NEGATIVE_INFINITY)).to.be.true;
+        expect(guard(null)).to.be.true;
+
+        expect(guard(undefined)).to.be.false;
+        expect(guard(true)).to.be.false;
+        expect(guard(false)).to.be.false;
+        expect(guard("")).to.be.false;
+        expect(guard("string")).to.be.false;
+        expect(guard("123string")).to.be.false;
+        expect(guard({})).to.be.false;
+        expect(guard(new SomeClass())).to.be.false;
+        expect(guard(someSymbol)).to.be.false;
+        expect(guard(someFunction)).to.be.false;
+    });
+
     it("should allow optional() modifier for numbers", () => {
         const guard = looksLike(optional(42));
 
@@ -273,6 +294,27 @@ describe("looksLike", () => {
         expect(guard({ body: "Foo", createdAt: new Date() })).to.be.true;
         expect(guard({ body: "Foo", createdAt: false })).to.be.false;
         expect(guard({ body: "Foo", createdAt: false, title: "Bar" })).to.be.false;
+    });
+
+    it("should be able to combine optional() and maybeNull() as maybeNil()", () => {
+        const guard = looksLike(maybeNil(42));
+
+        expect(guard(123)).to.be.true;
+        expect(guard(NaN)).to.be.true;
+        expect(guard(Number.POSITIVE_INFINITY)).to.be.true;
+        expect(guard(Number.NEGATIVE_INFINITY)).to.be.true;
+        expect(guard(undefined)).to.be.true;
+        expect(guard(null)).to.be.true;
+
+        expect(guard(true)).to.be.false;
+        expect(guard(false)).to.be.false;
+        expect(guard("")).to.be.false;
+        expect(guard("string")).to.be.false;
+        expect(guard("123string")).to.be.false;
+        expect(guard({})).to.be.false;
+        expect(guard(new SomeClass())).to.be.false;
+        expect(guard(someSymbol)).to.be.false;
+        expect(guard(someFunction)).to.be.false;
     });
 
     it("should not allow objects with constructors but no prototypes", () => {

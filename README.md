@@ -83,6 +83,12 @@ export const isNode = looksLike<INode>({
 });
 ```
 
+`optional` will make the type guard accept `undefined` as well as the "normal"
+inferred type (for the given property). If you need to accept `null` instead of
+`undefined`, use the `maybeNull` modifier. `maybeNil` combines `maybeNull` and
+`optional` so the type guard will accepth `undefined`, `null` and the "normal"
+inferred type as well.
+
 Passing an object with a constructor throws an Error. Typically, this happens
 if you add a class as an argument to `looksLike`, in which case you need to
 wrap the class in the `instanceOf` modifier to declare that you need an instance

@@ -1,5 +1,6 @@
 import {
     hasInstanceOfModifier,
+    hasMaybeNullPropertyModifier,
     hasOptionalPropertyModifier,
     IInstanceOfSpec,
     IOptionalPropertySpec,
@@ -35,6 +36,9 @@ export function looksLike<T>(example: T): (obj: any) => any {
     } else if (hasOptionalPropertyModifier<T>(example)) {
         const validator = looksLike<T>(example.value);
         return (obj: any): obj is (T | undefined) => (obj === undefined || validator(obj));
+    } else if (hasMaybeNullPropertyModifier<T>(example)) {
+        const validator = looksLike<T>(example.value);
+        return (obj: any): obj is (T | null) => (obj === null || validator(obj));
     } else if (example.constructor === Object) {
         // Plain object without a prototype
         const keysToValidators: {
