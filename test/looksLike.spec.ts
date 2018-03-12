@@ -184,7 +184,7 @@ describe("looksLike", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
-    })
+    });
 
     it("should simply return unary functions intact (assuming to be type guards)", () => {
         const guard = looksLike(someUnaryFunction);
