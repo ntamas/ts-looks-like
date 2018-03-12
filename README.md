@@ -64,16 +64,28 @@ In general, `looksLike` accepts the following objects as inputs:
 * Passing any symbol will return a type guard that accepts *any* symbol (not
   only the given one)
 
-* Passing any function will return a type guard that accepts *any* function
-  (not only the given one)
+* Passing any *unary* function is assumed to be a type guard on its own so
+  the function itself will be returned
+
+* Passing any other function to `looksLike` is not allowed.
 
 * Passing a plain object without a prototype will accept any object whose
   "shape" matches the example object (comparison is done key-wise for all keys
   in the example object, values are also treated as examples recursively using
-  `looksLike`).
+  `looksLike`). Objects can also be nested in each other, i.e. you can put
+  another object as a value for a key in a plain object. You can also pass
+  additional type guards (even ones generated with `looksLike`) as values.
 
-Optional properties are also allowed with the `optional` modifier, but in this
-case you *always* need a type hint:
+Modifiers
+---------
+
+`ts-looks-like` provides several helper functions that allow you to specify
+more advanced behaviour with `looksLike`. These helper functions are called
+*modifiers*; typically, they must be called with one or more arguments and
+will return a type guard function that you can then pass to `looksLike` as
+a value for a key in the example object. Typically, when using a modifier,
+you need a type hint for `looksLike` to help TypeScript infer the proper
+type; for example:
 
 ```ts
 export const isNode = looksLike<INode>({
@@ -83,40 +95,36 @@ export const isNode = looksLike<INode>({
 });
 ```
 
-`optional` will make the type guard accept `undefined` as well as the "normal"
-inferred type (for the given property). If you need to accept `null` instead of
-`undefined`, use the `maybeNull` modifier. `maybeNil` combines `maybeNull` and
-`optional` so the type guard will accepth `undefined`, `null` and the "normal"
-inferred type as well.
+Supported modifiers are:
 
-Passing an object with a constructor throws an Error. Typically, this happens
-if you add a class as an argument to `looksLike`, in which case you need to
-wrap the class in the `instanceOf` modifier to declare that you need an instance
-of a specific class, without supplying an example value for that class. Just like
-with the `optional` modifier, using it means that you explicitly need to tell
-`looksLike()` what type the input value is expected to be so TypeScript can
-infer the proper type for the generated function:
+* `optional(x)` will make the type guard accept `undefined` as well as the
+  type inferred from `x` as an example object. For instance, `optional(42)`
+  will return a type guard that accepts numbers and undefined.
 
-```ts
-export const isBlogPost = looksLike<IBlogPost>({
-    body: "Lorem ipsum dolor sit amet...",
-    createdAt: instanceOf(Date),
-    title: optional("Lorem ipsum")
-});
-```
+* `maybeNull(x)` will make the type guard accept `null` as well as the
+  type inferred from `x` as an example object.
+
+* `maybeNil` will make the type guard accept `null` or `undefined` as well as
+  the type inferred from `x` as an example object.
+
+* `instanceOf(x)` needs a class and will return a type guard that accepts
+  objects that are instances of the given class. This can be used to work
+  around the restriction that passing an object with a constructor to
+  `looksLike` throws an Error:
+
+  ```ts
+  export const isBlogPost = looksLike<IBlogPost>({
+      body: "Lorem ipsum dolor sit amet...",
+      createdAt: instanceOf(Date),
+      title: optional("Lorem ipsum")
+  });
+  ```
+
+Caveats
+-------
 
 `looksLike()` is not optimized for performance and it is not expected to cover
 all the possible use-cases; for instance, disjunctions of types are not covered
 and there is no plan to do so. If you need something more complicated, you will
-need to implement your own type guard, but you can still use `looksLike()` as a
-helper in the implementation. For instance, to allow the `createdAt` timestamp
-of a blog post to be represented either as a `Date` or a `number`,
-you can still write:
-
-```ts
-export type Timestamp = Date | number;
-
-export const isTimestamp = (value: any): value is Timestamp {
-    return looksLike(number)(value) || looksLike(Date)(value)
-}
-```
+need to implement your own type guard, but you can then use this type guard
+just like any other modifier described above.

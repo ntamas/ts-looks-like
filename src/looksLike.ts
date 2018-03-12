@@ -1,44 +1,31 @@
-import {
-    hasInstanceOfModifier,
-    hasMaybeNullPropertyModifier,
-    hasOptionalPropertyModifier,
-    IInstanceOfSpec,
-    IOptionalPropertySpec,
-    modifiers
-} from "./modifiers";
+import { TypeGuard } from "./types";
 
-export function looksLike(example: null): (obj: any) => obj is null;
-export function looksLike(example: undefined): (obj: any) => obj is undefined;
-export function looksLike(example: boolean): (obj: any) => obj is boolean;
-export function looksLike(example: number): (obj: any) => obj is number;
-export function looksLike(example: string): (obj: any) => obj is string;
-export function looksLike(example: symbol): (obj: any) => obj is symbol;
-export function looksLike<T>(example: IOptionalPropertySpec<T>): (obj: any) => obj is T | undefined;
-export function looksLike<T>(example: IInstanceOfSpec<T> | T | any): (obj: any) => obj is T;
-export function looksLike<T>(example: T): (obj: any) => any {
+export function looksLike(example: null): TypeGuard<null>;
+export function looksLike(example: undefined): TypeGuard<undefined>;
+export function looksLike(example: boolean): TypeGuard<boolean>;
+export function looksLike(example: number): TypeGuard<number>;
+export function looksLike(example: string): TypeGuard<string>;
+export function looksLike(example: symbol): TypeGuard<symbol>;
+export function looksLike<T>(example: TypeGuard<T> | any): TypeGuard<T>;
+export function looksLike<T>(example: any): TypeGuard<any> {
     if (looksLikeNull(example)) {
-        return looksLikeNull as any;
+        return looksLikeNull;
     } else if (looksLikeUndefined(example)) {
-        return looksLikeUndefined as any;
+        return looksLikeUndefined;
     } else if (looksLikeBoolean(example)) {
-        return looksLikeBoolean as any;
+        return looksLikeBoolean;
     } else if (looksLikeNumber(example)) {
-        return looksLikeNumber as any;
+        return looksLikeNumber;
     } else if (looksLikeString(example)) {
-        return looksLikeString as any;
+        return looksLikeString;
     } else if (looksLikeSymbol(example)) {
-        return looksLikeSymbol as any;
+        return looksLikeSymbol;
+    } else if (looksLikeUnaryFunction(example)) {
+        // Bit unsafe but we cannot check whether the function always returns
+        // a Boolean value
+        return example as any;
     } else if (looksLikeFunction(example)) {
-        return looksLikeFunction as any;
-    } else if (hasInstanceOfModifier(example)) {
-        const prototype = example[modifiers].instanceOf;
-        return (obj: any): obj is T => obj instanceof prototype;
-    } else if (hasOptionalPropertyModifier<T>(example)) {
-        const validator = looksLike<T>(example.value);
-        return (obj: any): obj is (T | undefined) => (obj === undefined || validator(obj));
-    } else if (hasMaybeNullPropertyModifier<T>(example)) {
-        const validator = looksLike<T>(example.value);
-        return (obj: any): obj is (T | null) => (obj === null || validator(obj));
+        throw new Error("functions are not allowed (except type guards)");
     } else if (example.constructor === Object) {
         // Plain object without a prototype
         const keysToValidators: {
@@ -46,7 +33,7 @@ export function looksLike<T>(example: T): (obj: any) => any {
         } = {};
         Object.keys(example).forEach(key => {
             const spec = (example as any)[key];
-            keysToValidators[key] = looksLike(spec);
+            keysToValidators[key] = looksLikeUnaryFunction(spec) ? spec : looksLike(spec);
         });
         const allKeys = Object.keys(keysToValidators);
         return (obj: any): obj is T => {
@@ -86,4 +73,8 @@ function looksLikeString(obj: any): obj is string {
 
 function looksLikeSymbol(obj: any): obj is symbol {
     return typeof obj === "symbol";
+}
+
+function looksLikeUnaryFunction(obj: any): obj is (arg: any) => any {
+    return looksLikeFunction(obj) && obj.length === 1;
 }

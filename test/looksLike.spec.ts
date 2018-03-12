@@ -5,6 +5,8 @@ const { expect } = chai;
 const someSymbol = Symbol("someSymbol");
 const someOtherSymbol = Symbol("someOtherSymbol");
 const someFunction = (): number => 42;
+const someUnaryFunction = (x: any) => x === 42;
+const someBinaryFunction = (x: number, y: number) => x + y;
 
 class SomeClass {
 }
@@ -148,56 +150,23 @@ describe("looksLike", () => {
         expect(guard(someFunction)).to.be.false;
     });
 
-    it("should generate type guards for functions", () => {
-        const guard = looksLike(someFunction);
+    it("should simply return unary functions intact (assuming to be type guards)", () => {
+        const guard = looksLike(someUnaryFunction);
+        expect(guard).to.equal(someUnaryFunction);
+    });
 
-        expect(guard(someFunction)).to.be.true;
-        expect(guard(SomeClass)).to.be.true;
-        expect(guard(SomeOtherClass)).to.be.true;
-        expect(guard(SomeDerivedClass)).to.be.true;
-
-        expect(guard(undefined)).to.be.false;
-        expect(guard(null)).to.be.false;
-        expect(guard(true)).to.be.false;
-        expect(guard(false)).to.be.false;
-        expect(guard(123)).to.be.false;
-        expect(guard(NaN)).to.be.false;
-        expect(guard(Number.POSITIVE_INFINITY)).to.be.false;
-        expect(guard(Number.NEGATIVE_INFINITY)).to.be.false;
-        expect(guard("")).to.be.false;
-        expect(guard("string")).to.be.false;
-        expect(guard("123string")).to.be.false;
-        expect(guard({})).to.be.false;
-        expect(guard(new SomeClass())).to.be.false;
-        expect(guard(someSymbol)).to.be.false;
+    it("should throw an error for functions with not exactly one argument", () => {
+        expect(() => looksLike(someFunction)).to.throw;
+        expect(() => looksLike(someBinaryFunction)).to.throw;
     });
 
     it("should throw an error for example objects with constructors", () => {
         expect(() => looksLike(new SomeClass())).to.throw;
     });
 
-    it("should generate type guards with instanceOf checks", () => {
-        const guard = looksLike(instanceOf(SomeClass));
-
-        expect(guard(new SomeClass())).to.be.true;
-        expect(guard(new SomeDerivedClass())).to.be.true;
-
-        expect(guard(undefined)).to.be.false;
-        expect(guard(null)).to.be.false;
-        expect(guard(true)).to.be.false;
-        expect(guard(false)).to.be.false;
-        expect(guard(123)).to.be.false;
-        expect(guard(NaN)).to.be.false;
-        expect(guard(Number.POSITIVE_INFINITY)).to.be.false;
-        expect(guard(Number.NEGATIVE_INFINITY)).to.be.false;
-        expect(guard("")).to.be.false;
-        expect(guard("string")).to.be.false;
-        expect(guard("123string")).to.be.false;
-        expect(guard({})).to.be.false;
-        expect(guard(SomeClass)).to.be.false;
-        expect(guard(new SomeOtherClass())).to.be.false;
-        expect(guard(someSymbol)).to.be.false;
-        expect(guard(someFunction)).to.be.false;
+    it("should throw an error for objects with constructors but no prototypes", () => {
+        const object = Object.create(SomeClass.prototype);
+        expect(() => looksLike(object)).to.throw();
     });
 
     it("should generate type guards for plain objects", () => {
@@ -240,46 +209,56 @@ describe("looksLike", () => {
         expect(guard(instance)).to.be.true;
     });
 
-    it("should allow maybeNull() modifier for numbers", () => {
-        const guard = looksLike(maybeNull(42));
+    it("should generate type guards for plain objects with nested sub-objects", () => {
+        const guard = looksLike({
+            baz: true,
+            foo: {
+                frob: optional(42),
+                quux: "bar"
+            }
+        });
 
-        expect(guard(123)).to.be.true;
-        expect(guard(NaN)).to.be.true;
-        expect(guard(Number.POSITIVE_INFINITY)).to.be.true;
-        expect(guard(Number.NEGATIVE_INFINITY)).to.be.true;
-        expect(guard(null)).to.be.true;
+        const basics = [
+            undefined, null, true, false, 123, NaN,
+            Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, "",
+            "string", "123string", {}, SomeClass, new SomeClass(),
+            someSymbol, someFunction
+        ];
+        expect(basics.filter(guard)).to.be.empty;
 
-        expect(guard(undefined)).to.be.false;
-        expect(guard(true)).to.be.false;
-        expect(guard(false)).to.be.false;
-        expect(guard("")).to.be.false;
-        expect(guard("string")).to.be.false;
-        expect(guard("123string")).to.be.false;
-        expect(guard({})).to.be.false;
-        expect(guard(new SomeClass())).to.be.false;
-        expect(guard(someSymbol)).to.be.false;
-        expect(guard(someFunction)).to.be.false;
-    });
+        expect(guard({
+            baz: true,
+            foo: {
+                frob: 47,
+                quux: "bar"
+            }
+        })).to.be.true;
+        expect(guard({
+            baz: true,
+            foo: {
+                quux: "bar"
+            }
+        })).to.be.true;
+        expect(guard({
+            baz: 42,
+            foo: {
+                quux: "bar"
+            }
+        })).to.be.false;
+        expect(guard({
+            foo: {
+                frob: 47,
+                quux: "bar"
+            }
+        })).to.be.false;
 
-    it("should allow optional() modifier for numbers", () => {
-        const guard = looksLike(optional(42));
-
-        expect(guard(123)).to.be.true;
-        expect(guard(NaN)).to.be.true;
-        expect(guard(Number.POSITIVE_INFINITY)).to.be.true;
-        expect(guard(Number.NEGATIVE_INFINITY)).to.be.true;
-        expect(guard(undefined)).to.be.true;
-
-        expect(guard(null)).to.be.false;
-        expect(guard(true)).to.be.false;
-        expect(guard(false)).to.be.false;
-        expect(guard("")).to.be.false;
-        expect(guard("string")).to.be.false;
-        expect(guard("123string")).to.be.false;
-        expect(guard({})).to.be.false;
-        expect(guard(new SomeClass())).to.be.false;
-        expect(guard(someSymbol)).to.be.false;
-        expect(guard(someFunction)).to.be.false;
+        const instance: any = new SomeClass();
+        instance.foo = {
+            frob: 47,
+            quux: "bar"
+        };
+        instance.baz = true;
+        expect(guard(instance)).to.be.true;
     });
 
     it("should be able to combine optional() and instanceOf()", () => {
@@ -294,31 +273,5 @@ describe("looksLike", () => {
         expect(guard({ body: "Foo", createdAt: new Date() })).to.be.true;
         expect(guard({ body: "Foo", createdAt: false })).to.be.false;
         expect(guard({ body: "Foo", createdAt: false, title: "Bar" })).to.be.false;
-    });
-
-    it("should be able to combine optional() and maybeNull() as maybeNil()", () => {
-        const guard = looksLike(maybeNil(42));
-
-        expect(guard(123)).to.be.true;
-        expect(guard(NaN)).to.be.true;
-        expect(guard(Number.POSITIVE_INFINITY)).to.be.true;
-        expect(guard(Number.NEGATIVE_INFINITY)).to.be.true;
-        expect(guard(undefined)).to.be.true;
-        expect(guard(null)).to.be.true;
-
-        expect(guard(true)).to.be.false;
-        expect(guard(false)).to.be.false;
-        expect(guard("")).to.be.false;
-        expect(guard("string")).to.be.false;
-        expect(guard("123string")).to.be.false;
-        expect(guard({})).to.be.false;
-        expect(guard(new SomeClass())).to.be.false;
-        expect(guard(someSymbol)).to.be.false;
-        expect(guard(someFunction)).to.be.false;
-    });
-
-    it("should not allow objects with constructors but no prototypes", () => {
-        const object = Object.create(SomeClass.prototype);
-        expect(() => looksLike(object)).to.throw();
     });
 });
