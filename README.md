@@ -64,6 +64,10 @@ In general, `looksLike` accepts the following objects as inputs:
 * Passing any symbol will return a type guard that accepts *any* symbol (not
   only the given one)
 
+* Passing any array will return a type guard that accepts arbitrary arrays
+  (with arbitrary item types). See the `arrayOf()` modifier below for typed
+  arrays.
+
 * Passing any *unary* function is assumed to be a type guard on its own so
   the function itself will be returned
 

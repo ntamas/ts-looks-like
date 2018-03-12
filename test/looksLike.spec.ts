@@ -1,4 +1,4 @@
-import looksLike, { instanceOf, maybeNil, maybeNull, optional } from "../src";
+import looksLike, { optional } from "../src";
 
 const { expect } = chai;
 
@@ -43,6 +43,8 @@ describe("looksLike", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 
     it("should generate type guards for undefined", () => {
@@ -63,6 +65,8 @@ describe("looksLike", () => {
         expect(guard({})).to.be.false;
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 
     it("should generate type guards for booleans", () => {
@@ -84,6 +88,8 @@ describe("looksLike", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 
     it("should generate type guards for numbers", () => {
@@ -105,6 +111,8 @@ describe("looksLike", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 
     it("should generate type guards for strings", () => {
@@ -126,6 +134,8 @@ describe("looksLike", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 
     it("should generate type guards for symbols", () => {
@@ -148,7 +158,33 @@ describe("looksLike", () => {
         expect(guard({})).to.be.false;
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
+
+    it("should generate type guards for untyped arrays", () => {
+        const guard = looksLike([123, 456]);
+
+        expect(guard([])).to.be.true;
+        expect(guard([123])).to.be.true;
+        expect(guard(["foo", NaN])).to.be.true;
+
+        expect(guard(undefined)).to.be.false;
+        expect(guard(null)).to.be.false;
+        expect(guard(true)).to.be.false;
+        expect(guard(false)).to.be.false;
+        expect(guard(123)).to.be.false;
+        expect(guard(NaN)).to.be.false;
+        expect(guard(Number.POSITIVE_INFINITY)).to.be.false;
+        expect(guard(Number.NEGATIVE_INFINITY)).to.be.false;
+        expect(guard("")).to.be.false;
+        expect(guard("string")).to.be.false;
+        expect(guard("123string")).to.be.false;
+        expect(guard({})).to.be.false;
+        expect(guard(new SomeClass())).to.be.false;
+        expect(guard(someSymbol)).to.be.false;
+        expect(guard(someFunction)).to.be.false;
+    })
 
     it("should simply return unary functions intact (assuming to be type guards)", () => {
         const guard = looksLike(someUnaryFunction);
@@ -259,19 +295,5 @@ describe("looksLike", () => {
         };
         instance.baz = true;
         expect(guard(instance)).to.be.true;
-    });
-
-    it("should be able to combine optional() and instanceOf()", () => {
-        const guard = looksLike<IBlogEntry>({
-            body: "Lorem ipsum dolor sit amet...",
-            createdAt: optional(instanceOf(Date)),
-            title: optional("Lorem ipsum")
-        });
-
-        expect(guard({})).to.be.false;
-        expect(guard({ body: "Foo" })).to.be.true;
-        expect(guard({ body: "Foo", createdAt: new Date() })).to.be.true;
-        expect(guard({ body: "Foo", createdAt: false })).to.be.false;
-        expect(guard({ body: "Foo", createdAt: false, title: "Bar" })).to.be.false;
     });
 });

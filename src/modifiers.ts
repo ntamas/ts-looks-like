@@ -27,3 +27,10 @@ export function optional<T>(value: T): TypeGuard<T | undefined> {
         return obj === undefined || validator(obj);
     };
 }
+
+export function arrayOf<T>(typicalItem: T | TypeGuard<T>): TypeGuard<T[]> {
+    const validator = looksLike<T>(typicalItem);
+    return (obj: any): obj is T[] => {
+        return Array.isArray(obj) && obj.every(item => validator(item));
+    };
+}

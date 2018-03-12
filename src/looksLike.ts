@@ -6,6 +6,7 @@ export function looksLike(example: boolean): TypeGuard<boolean>;
 export function looksLike(example: number): TypeGuard<number>;
 export function looksLike(example: string): TypeGuard<string>;
 export function looksLike(example: symbol): TypeGuard<symbol>;
+export function looksLike<T>(example: any[]): TypeGuard<any[]>;
 export function looksLike<T>(example: TypeGuard<T> | any): TypeGuard<T>;
 export function looksLike<T>(example: any): TypeGuard<any> {
     if (looksLikeNull(example)) {
@@ -20,6 +21,8 @@ export function looksLike<T>(example: any): TypeGuard<any> {
         return looksLikeString;
     } else if (looksLikeSymbol(example)) {
         return looksLikeSymbol;
+    } else if (looksLikeArray(example)) {
+        return looksLikeArray;
     } else if (looksLikeUnaryFunction(example)) {
         // Bit unsafe but we cannot check whether the function always returns
         // a Boolean value
@@ -53,6 +56,10 @@ function looksLikeNull(obj: any): obj is null {
 
 function looksLikeUndefined(obj: any): obj is undefined {
     return obj === undefined;
+}
+
+function looksLikeArray(obj: any): obj is any[] {
+    return Array.isArray(obj);
 }
 
 function looksLikeBoolean(obj: any): obj is boolean {

@@ -1,4 +1,4 @@
-import looksLike, { instanceOf, maybeNil, maybeNull, optional } from "../src";
+import looksLike, { arrayOf, instanceOf, maybeNil, maybeNull, optional } from "../src";
 
 const { expect } = chai;
 
@@ -46,6 +46,8 @@ describe("instanceOf() modifier", () => {
         expect(guard(new SomeOtherClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 });
 
@@ -69,6 +71,8 @@ describe("maybeNil() modifier", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 });
 
@@ -92,6 +96,8 @@ describe("maybeNull() modifier", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
     });
 });
 
@@ -115,6 +121,35 @@ describe("optional() modifier", () => {
         expect(guard(new SomeClass())).to.be.false;
         expect(guard(someSymbol)).to.be.false;
         expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+        expect(guard([123])).to.be.false;
+    });
+});
+
+describe("arrayOf() modifier", () => {
+    it("should check whether the passed object is a typed array", () => {
+        const guard = arrayOf(42);
+
+        expect(guard([])).to.be.true;
+        expect(guard([123])).to.be.true;
+        expect(guard([123, 888, NaN])).to.be.true;
+
+        expect(guard(123)).to.be.false;
+        expect(guard(NaN)).to.be.false;
+        expect(guard(Number.POSITIVE_INFINITY)).to.be.false;
+        expect(guard(Number.NEGATIVE_INFINITY)).to.be.false;
+        expect(guard(undefined)).to.be.false;
+        expect(guard(null)).to.be.false;
+        expect(guard(true)).to.be.false;
+        expect(guard(false)).to.be.false;
+        expect(guard("")).to.be.false;
+        expect(guard("string")).to.be.false;
+        expect(guard("123string")).to.be.false;
+        expect(guard({})).to.be.false;
+        expect(guard(new SomeClass())).to.be.false;
+        expect(guard(someSymbol)).to.be.false;
+        expect(guard(someFunction)).to.be.false;
+        expect(guard([123, "foobar"])).to.be.false;
     });
 });
 
