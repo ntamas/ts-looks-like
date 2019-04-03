@@ -124,6 +124,45 @@ Supported modifiers are:
   });
   ```
 
+Combiners
+---------
+
+Multiple type guards may be combined with the `allOf()` and `anyOf()`
+functions. `allOf(...)` will return a type guard that takes an object and
+returns `true` if the object passes all the type guards passed to the
+original `allOf()` invocation. Similarly, `anyOf(...)` will return a type
+guard that returns `true` if the object passes at least one of the type
+guards passed to the original `anyOf()` invocation.
+
+These functions accept any object that is accepted by `looksLike()` itself,
+so you can do something like this:
+
+```ts
+export const isNumberOrString = anyOf(123, "Lorem ipsum");
+```
+
+You can also use `allOf()` to handle interface inheritance:
+
+```ts
+export interface INode {
+    label: string;
+    visible: boolean;
+}
+
+export const isNode = looksLike<INode>({
+    label: "Some label",
+    visible: false
+});
+
+export interface IColoredNode extends INode {
+    color: string;
+}
+
+export const isColoredNode = allOf(isNode, {
+    color: "red"
+});
+```
+
 Caveats
 -------
 
