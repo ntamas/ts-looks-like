@@ -11,18 +11,6 @@ const someBinaryFunction = (x: number, y: number) => x + y;
 class SomeClass {
 }
 
-class SomeDerivedClass extends SomeClass {
-}
-
-class SomeOtherClass {
-}
-
-interface IBlogEntry {
-    body: string;
-    createdAt?: Date;
-    title?: string;
-}
-
 describe("looksLike", () => {
     it("should generate type guards for null", () => {
         const guard = looksLike(null);

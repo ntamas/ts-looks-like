@@ -3,10 +3,7 @@ import looksLike, { arrayOf, instanceOf, maybeNil, maybeNull, optional } from ".
 const { expect } = chai;
 
 const someSymbol = Symbol("someSymbol");
-const someOtherSymbol = Symbol("someOtherSymbol");
 const someFunction = (): number => 42;
-const someUnaryFunction = (x: any) => x === 42;
-const someBinaryFunction = (x: number, y: number) => x + y;
 
 class SomeClass {
 }
