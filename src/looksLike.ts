@@ -6,7 +6,7 @@ export function looksLike(example: boolean): TypeGuard<boolean>;
 export function looksLike(example: number): TypeGuard<number>;
 export function looksLike(example: string): TypeGuard<string>;
 export function looksLike(example: symbol): TypeGuard<symbol>;
-export function looksLike<T>(example: any[]): TypeGuard<any[]>;
+export function looksLike(example: any[]): TypeGuard<any[]>;
 export function looksLike<T>(example: TypeGuard<T> | any): TypeGuard<T>;
 export function looksLike<T>(example: any): TypeGuard<any> {
     if (looksLikeNull(example)) {

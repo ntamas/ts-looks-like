@@ -180,12 +180,12 @@ describe("looksLike", () => {
     });
 
     it("should throw an error for functions with not exactly one argument", () => {
-        expect(() => looksLike(someFunction)).to.throw;
-        expect(() => looksLike(someBinaryFunction)).to.throw;
+        expect(() => looksLike(someFunction)).to.throw();
+        expect(() => looksLike(someBinaryFunction)).to.throw();
     });
 
     it("should throw an error for example objects with constructors", () => {
-        expect(() => looksLike(new SomeClass())).to.throw;
+        expect(() => looksLike(new SomeClass())).to.throw();
     });
 
     it("should throw an error for objects with constructors but no prototypes", () => {
