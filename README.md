@@ -124,6 +124,10 @@ Supported modifiers are:
   });
   ```
 
+* `arrayOf(x)` will make the type guard accept arbitrary arrays of objects
+  that are of the type inferred from `x` as an example object.
+
+
 Combiners
 ---------
 
