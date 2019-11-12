@@ -1,6 +1,6 @@
 {
   "name": "ts-looks-like",
-  "version": "2.1.3",
+  "version": "2.2.0",
   "description": "Helper function to generate TypeScript type guards from an example instance",
   "main": "lib/src/index.js",
   "typings": "lib/src/index",
