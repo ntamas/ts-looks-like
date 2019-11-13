@@ -5,6 +5,7 @@
         "alwaysStrict": true,
         "baseUrl": "src",
         "declaration": true,
+        "declarationMap": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "jsx": "react",
