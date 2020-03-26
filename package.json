@@ -10,7 +10,7 @@
   ],
   "author": "Tamas Nepusz",
   "bugs": "https://github.com/ntamas/ts-looks-like/issues",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "keywords": [
     "typescript",
     "type guard",
