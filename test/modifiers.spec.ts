@@ -1,18 +1,23 @@
-import looksLike, { arrayOf, instanceOf, maybeNil, maybeNull, optional } from "../src";
+import looksLike, {
+    arrayOf,
+    exactly,
+    instanceOf,
+    maybeNil,
+    maybeNull,
+    oneOf,
+    optional
+} from "../src";
 
 const { expect } = chai;
 
 const someSymbol = Symbol("someSymbol");
 const someFunction = (): number => 42;
 
-class SomeClass {
-}
+class SomeClass {}
 
-class SomeDerivedClass extends SomeClass {
-}
+class SomeDerivedClass extends SomeClass {}
 
-class SomeOtherClass {
-}
+class SomeOtherClass {}
 
 interface IBlogEntry {
     body: string;
@@ -150,6 +155,41 @@ describe("arrayOf() modifier", () => {
     });
 });
 
+describe("exactly modifier", () => {
+    it("should check whether the passed object is an exact match", () => {
+        const guard = exactly("foo");
+
+        expect(guard("foo")).to.be.true;
+        expect(guard("bar")).to.be.false;
+        expect(guard(1)).to.be.false;
+        expect(guard(true)).to.be.false;
+
+        const o = {};
+        const anotherGuard = exactly(o);
+
+        expect(anotherGuard(o)).to.be.true;
+        expect(anotherGuard({})).to.be.false;
+    });
+});
+
+describe("oneOf modifier", () => {
+    it("should check whether the passed object is an exact match for one of the guard values", () => {
+        const guard = oneOf([11, 22, 33, "44", "55"]);
+
+        expect(guard(11)).to.be.true;
+        expect(guard(22)).to.be.true;
+        expect(guard(33)).to.be.true;
+        expect(guard("44")).to.be.true;
+        expect(guard("55")).to.be.true;
+
+        expect(guard(1)).to.be.false;
+        expect(guard(2)).to.be.false;
+        expect(guard(333)).to.be.false;
+        expect(guard(44)).to.be.false;
+        expect(guard(55)).to.be.false;
+    });
+});
+
 describe("modifier combinations", () => {
     it("should be able to combine optional() and instanceOf()", () => {
         const guard = looksLike<IBlogEntry>({
@@ -162,6 +202,7 @@ describe("modifier combinations", () => {
         expect(guard({ body: "Foo" })).to.be.true;
         expect(guard({ body: "Foo", createdAt: new Date() })).to.be.true;
         expect(guard({ body: "Foo", createdAt: false })).to.be.false;
-        expect(guard({ body: "Foo", createdAt: false, title: "Bar" })).to.be.false;
+        expect(guard({ body: "Foo", createdAt: false, title: "Bar" })).to.be
+            .false;
     });
 });
