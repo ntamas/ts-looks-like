@@ -1,6 +1,17 @@
 import { looksLike } from "./looksLike";
 import { Newable, TypeGuard } from "./types";
 
+export function arrayOf<T>(typicalItem: T | TypeGuard<T>): TypeGuard<T[]> {
+    const validator = looksLike<T>(typicalItem);
+    return (obj: any): obj is T[] => {
+        return Array.isArray(obj) && obj.every(item => validator(item));
+    };
+}
+
+export function exactly<T>(value: T): TypeGuard<T> {
+    return (obj: any): obj is T => obj === value;
+}
+
 export function instanceOf<T>(someClass: Newable<T>): TypeGuard<T> {
     return (obj: any): obj is T => {
         return obj instanceof someClass;
@@ -21,16 +32,13 @@ export function maybeNull<T>(value: T): TypeGuard<T | null> {
     };
 }
 
+export function oneOf<T>(values: T[]): TypeGuard<T> {
+    return (obj: any): obj is T => values.indexOf(obj) >= 0;
+}
+
 export function optional<T>(value: T): TypeGuard<T | undefined> {
     const validator = looksLike(value);
     return (obj: any): obj is T | undefined => {
         return obj === undefined || validator(obj);
-    };
-}
-
-export function arrayOf<T>(typicalItem: T | TypeGuard<T>): TypeGuard<T[]> {
-    const validator = looksLike<T>(typicalItem);
-    return (obj: any): obj is T[] => {
-        return Array.isArray(obj) && obj.every(item => validator(item));
     };
 }

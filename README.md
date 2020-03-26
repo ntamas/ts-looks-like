@@ -1,5 +1,4 @@
-ts-looks-like
-=============
+# ts-looks-like
 
 Helper function to generate TypeScript type guards from an example instance.
 
@@ -20,10 +19,15 @@ Creating a type guard manually is tedious:
 
 ```ts
 export function isNode(obj: any): obj is INode {
-    return typeof obj === "object" &&
-        obj.hasOwnProperty("label") && typeof obj.label === "string" &&
-        obj.hasOwnProperty("color") && typeof obj.color === "string" &&
-        obj.hasOwnProperty("visible") && typeof obj.label === "boolean";
+    return (
+        typeof obj === "object" &&
+        obj.hasOwnProperty("label") &&
+        typeof obj.label === "string" &&
+        obj.hasOwnProperty("color") &&
+        typeof obj.color === "string" &&
+        obj.hasOwnProperty("visible") &&
+        typeof obj.label === "boolean"
+    );
 }
 ```
 
@@ -51,41 +55,40 @@ export const isNode = looksLike<INode>({
 
 In general, `looksLike` accepts the following objects as inputs:
 
-* `undefined` will return a type guard that accepts `undefined` only
+-   `undefined` will return a type guard that accepts `undefined` only.
 
-* `null` will return a type guard that accepts `null` only
+-   `null` will return a type guard that accepts `null` only.
 
-* Passing `true` or `false` will return a type guard that accepts a boolean
+-   Passing `true` or `false` will return a type guard that accepts a boolean.
 
-* Passing any number will return a type guard that accepts a number
+-   Passing any number will return a type guard that accepts a number.
 
-* Passing any string will return a type guard that accepts a string
+-   Passing any string will return a type guard that accepts a string.
 
-* Passing any symbol will return a type guard that accepts *any* symbol (not
-  only the given one)
+-   Passing any symbol will return a type guard that accepts _any_ symbol (not
+    only the given one).
 
-* Passing any array will return a type guard that accepts arbitrary arrays
-  (with arbitrary item types). See the `arrayOf()` modifier below for typed
-  arrays.
+-   Passing any array will return a type guard that accepts arbitrary arrays
+    (with arbitrary item types). See the `arrayOf()` modifier below for typed
+    arrays.
 
-* Passing any *unary* function is assumed to be a type guard on its own so
-  the function itself will be returned
+-   Passing any _unary_ function is assumed to be a type guard on its own so
+    the function itself will be returned.
 
-* Passing any other function to `looksLike` is not allowed.
+-   Passing any other function to `looksLike` is not allowed.
 
-* Passing a plain object without a prototype will accept any object whose
-  "shape" matches the example object (comparison is done key-wise for all keys
-  in the example object, values are also treated as examples recursively using
-  `looksLike`). Objects can also be nested in each other, i.e. you can put
-  another object as a value for a key in a plain object. You can also pass
-  additional type guards (even ones generated with `looksLike`) as values.
+-   Passing a plain object without a prototype will accept any object whose
+    "shape" matches the example object (comparison is done key-wise for all keys
+    in the example object, values are also treated as examples recursively using
+    `looksLike`). Objects can also be nested in each other, i.e. you can put
+    another object as a value for a key in a plain object. You can also pass
+    additional type guards (even ones generated with `looksLike`) as values.
 
-Modifiers
----------
+## Modifiers
 
 `ts-looks-like` provides several helper functions that allow you to specify
 more advanced behaviour with `looksLike`. These helper functions are called
-*modifiers*; typically, they must be called with one or more arguments and
+_modifiers_; typically, they must be called with one or more arguments and
 will return a type guard function that you can then pass to `looksLike` as
 a value for a key in the example object. Typically, when using a modifier,
 you need a type hint for `looksLike` to help TypeScript infer the proper
@@ -101,35 +104,38 @@ export const isNode = looksLike<INode>({
 
 Supported modifiers are:
 
-* `optional(x)` will make the type guard accept `undefined` as well as the
-  type inferred from `x` as an example object. For instance, `optional(42)`
-  will return a type guard that accepts numbers and undefined.
+-   `arrayOf(x)` will make the type guard accept arbitrary arrays of objects
+    that are of the type inferred from `x` as an example object.
 
-* `maybeNull(x)` will make the type guard accept `null` as well as the
-  type inferred from `x` as an example object.
+-   `exactly(x)` will make the type guard accept `x` and only exactly `x`.
 
-* `maybeNil` will make the type guard accept `null` or `undefined` as well as
-  the type inferred from `x` as an example object.
+-   `instanceOf(x)` needs a class and will return a type guard that accepts
+    objects that are instances of the given class. This can be used to work
+    around the restriction that passing an object with a constructor to
+    `looksLike` throws an Error:
 
-* `instanceOf(x)` needs a class and will return a type guard that accepts
-  objects that are instances of the given class. This can be used to work
-  around the restriction that passing an object with a constructor to
-  `looksLike` throws an Error:
+-   `maybeNull(x)` will make the type guard accept `null` as well as the
+    type inferred from `x` as an example object.
 
-  ```ts
-  export const isBlogPost = looksLike<IBlogPost>({
-      body: "Lorem ipsum dolor sit amet...",
-      createdAt: instanceOf(Date),
-      title: optional("Lorem ipsum")
-  });
-  ```
+-   `maybeNil` will make the type guard accept `null` or `undefined` as well as
+    the type inferred from `x` as an example object.
 
-* `arrayOf(x)` will make the type guard accept arbitrary arrays of objects
-  that are of the type inferred from `x` as an example object.
+-   `oneOf(x)` will make the type guard accept objects that are an exact match
+    for one of items in the `x` array.
 
+-   `optional(x)` will make the type guard accept `undefined` as well as the
+    type inferred from `x` as an example object. For instance, `optional(42)`
+    will return a type guard that accepts numbers and undefined.
 
-Combiners
----------
+```ts
+export const isBlogPost = looksLike<IBlogPost>({
+    body: "Lorem ipsum dolor sit amet...",
+    createdAt: instanceOf(Date),
+    title: optional("Lorem ipsum")
+});
+```
+
+## Combiners
 
 Multiple type guards may be combined with the `allOf()` and `anyOf()`
 functions. `allOf(...)` will return a type guard that takes an object and
@@ -167,8 +173,7 @@ export const isColoredNode = allOf(isNode, {
 });
 ```
 
-Caveats
--------
+## Caveats
 
 `looksLike()` is not optimized for performance and it is not expected to cover
 all the possible use-cases; for instance, disjunctions of types are not covered
