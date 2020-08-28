@@ -5,7 +5,8 @@ import looksLike, {
     maybeNil,
     maybeNull,
     oneOf,
-    optional
+    optional,
+    record,
 } from "../src";
 
 const { expect } = chai;
@@ -190,12 +191,83 @@ describe("oneOf modifier", () => {
     });
 });
 
+describe("record modifier", () => {
+    it("should generate type guards for Record<string, number>", () => {
+        const guard = record("", 42);
+
+        expect(guard({})).to.be.true;
+        expect(guard({ foo: 42, bar: 97 })).to.be.true;
+        expect(guard({ [42]: 42, bar: 97 })).to.be.true;
+        expect(guard({ foo: 42, bar: NaN })).to.be.true;
+        expect(guard({ bar: Number.POSITIVE_INFINITY })).to.be.true;
+        expect(guard({ bar: Number.NEGATIVE_INFINITY })).to.be.true;
+
+        expect(guard({ foo: 42, bar: true })).to.be.false;
+        expect(guard({ foo: 42, bar: false })).to.be.false;
+        expect(guard({ bar: undefined })).to.be.false;
+        expect(guard({ bar: null })).to.be.false;
+        expect(guard({ foo: 97, bar: "42" })).to.be.false;
+        expect(guard({ foo: 42, bar: {} })).to.be.false;
+        expect(guard({ foo: 42, bar: new SomeClass() })).to.be.false;
+        expect(guard({ foo: 42, bar: someSymbol })).to.be.false;
+        expect(guard({ foo: someFunction })).to.be.false;
+        expect(guard({ foo: [] })).to.be.false;
+        expect(guard(true)).to.be.false;
+        expect(guard(false)).to.be.false;
+        expect(guard(undefined)).to.be.false;
+        expect(guard(null)).to.be.false;
+        expect(guard(42)).to.be.false;
+        expect(guard(NaN)).to.be.false;
+        expect(guard(Number.POSITIVE_INFINITY)).to.be.false;
+        expect(guard(Number.NEGATIVE_INFINITY)).to.be.false;
+        expect(guard(SomeClass)).to.be.false;
+        expect(guard(new SomeClass())).to.be.false;
+        expect(guard(someSymbol)).to.be.false;
+        expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+    });
+
+    it("should generate type guards for Record<number, string>", () => {
+        const guard = record(42, "");
+
+        expect(guard({})).to.be.true;
+        expect(guard({ [1]: "Foo", [2]: "" })).to.be.true;
+
+        expect(guard({ [1]: "Foo", [2]: true })).to.be.false;
+        expect(guard({ [1]: "Foo", [2]: false })).to.be.false;
+        expect(guard({ [2]: undefined })).to.be.false;
+        expect(guard({ [2]: null })).to.be.false;
+        expect(guard({ [1]: "Foo", [2]: 42 })).to.be.false;
+        expect(guard({ [1]: "Foo", [2]: NaN })).to.be.false;
+        expect(guard({ [2]: Number.POSITIVE_INFINITY })).to.be.false;
+        expect(guard({ [2]: Number.NEGATIVE_INFINITY })).to.be.false;
+        expect(guard({ [1]: "Foo", [2]: {} })).to.be.false;
+        expect(guard({ [1]: "Foo", [2]: new SomeClass() })).to.be.false;
+        expect(guard({ [1]: "Foo", [2]: someSymbol })).to.be.false;
+        expect(guard({ [1]: someFunction })).to.be.false;
+        expect(guard({ [1]: [] })).to.be.false;
+        expect(guard(true)).to.be.false;
+        expect(guard(false)).to.be.false;
+        expect(guard(undefined)).to.be.false;
+        expect(guard(null)).to.be.false;
+        expect(guard(42)).to.be.false;
+        expect(guard(NaN)).to.be.false;
+        expect(guard(Number.POSITIVE_INFINITY)).to.be.false;
+        expect(guard(Number.NEGATIVE_INFINITY)).to.be.false;
+        expect(guard(SomeClass)).to.be.false;
+        expect(guard(new SomeClass())).to.be.false;
+        expect(guard(someSymbol)).to.be.false;
+        expect(guard(someFunction)).to.be.false;
+        expect(guard([])).to.be.false;
+    });
+});
+
 describe("modifier combinations", () => {
     it("should be able to combine optional() and instanceOf()", () => {
         const guard = looksLike<IBlogEntry>({
             body: "Lorem ipsum dolor sit amet...",
             createdAt: optional(instanceOf(Date)),
-            title: optional("Lorem ipsum")
+            title: optional("Lorem ipsum"),
         });
 
         expect(guard({})).to.be.false;
