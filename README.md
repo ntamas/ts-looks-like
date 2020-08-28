@@ -37,7 +37,7 @@ However, you can now use `looksLike` to generate one from an example object:
 const nodeExample: INode = {
     label: "Some label",
     color: "red",
-    visible: false
+    visible: false,
 };
 
 export const isNode = looksLike(nodeExample);
@@ -49,7 +49,7 @@ You can also inline the example object if you give a type hint to `looksLike`:
 export const isNode = looksLike<INode>({
     label: "Some label",
     color: "red",
-    visible: false
+    visible: false,
 });
 ```
 
@@ -98,7 +98,7 @@ type; for example:
 export const isNode = looksLike<INode>({
     label: "Some label",
     color: optional("red"),
-    visible: false
+    visible: false,
 });
 ```
 
@@ -127,11 +127,15 @@ Supported modifiers are:
     type inferred from `x` as an example object. For instance, `optional(42)`
     will return a type guard that accepts numbers and undefined.
 
+-   `record(key, x)` will make the type guard accept `Record`s whose keys
+    match the `key` example value or type guard and whose values satisfy
+    the `x` example object or type guard.
+
 ```ts
 export const isBlogPost = looksLike<IBlogPost>({
     body: "Lorem ipsum dolor sit amet...",
     createdAt: instanceOf(Date),
-    title: optional("Lorem ipsum")
+    title: optional("Lorem ipsum"),
 });
 ```
 
@@ -161,7 +165,7 @@ export interface INode {
 
 export const isNode = looksLike<INode>({
     label: "Some label",
-    visible: false
+    visible: false,
 });
 
 export interface IColoredNode extends INode {
@@ -169,7 +173,7 @@ export interface IColoredNode extends INode {
 }
 
 export const isColoredNode = allOf(isNode, {
-    color: "red"
+    color: "red",
 });
 ```
 
