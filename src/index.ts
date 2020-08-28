@@ -9,7 +9,8 @@ export {
     maybeNil,
     maybeNull,
     oneOf,
-    optional
+    optional,
+    record,
 } from "./modifiers";
 export { TypeGuard } from "./types";
 
