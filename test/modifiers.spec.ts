@@ -156,7 +156,7 @@ describe("arrayOf() modifier", () => {
     });
 });
 
-describe("exactly modifier", () => {
+describe("exactly() modifier", () => {
     it("should check whether the passed object is an exact match", () => {
         const guard = exactly("foo");
 
@@ -173,7 +173,7 @@ describe("exactly modifier", () => {
     });
 });
 
-describe("oneOf modifier", () => {
+describe("oneOf() modifier", () => {
     it("should check whether the passed object is an exact match for one of the guard values", () => {
         const guard = oneOf([11, 22, 33, "44", "55"]);
 
@@ -191,7 +191,7 @@ describe("oneOf modifier", () => {
     });
 });
 
-describe("record modifier", () => {
+describe("record() modifier", () => {
     it("should generate type guards for Record<string, number>", () => {
         const guard = record("", 42);
 
