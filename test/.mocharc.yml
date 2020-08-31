@@ -1,0 +1,12 @@
+extension:
+  - ts
+require:
+  - "ts-node/register"
+  - "source-map-support/register"
+  - "test/setup.js"
+spec:
+  - "test/**/*.spec.ts"
+recursive: true
+watch-files:
+  - "src/**/*.ts"
+  - "test/**/*.spec.ts"
